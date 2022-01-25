@@ -1,41 +1,15 @@
 import { Box, Button, Text, TextField, Image } from '@skynexui/components';
+import { useRouter } from 'next/router';
 import appConfig from '../config.json';
+import React, { useState } from 'react';
 
-function GlobalStyle() {
-  return (
-    <style global jsx>{`
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        list-style: none;
-      }
-      body {
-        font-family: 'Open Sans', sans-serif;
-      }
-      /* App fit Height */ 
-      html, body, #__next {
-        min-height: 100vh;
-        display: flex;
-        flex: 1;
-      }
-      #__next {
-        flex: 1;
-      }
-      #__next > * {
-        flex: 1;
-      }
-      /* ./App fit Height */ 
-    `}</style>
-  );
-}
 
-function Titulo(props) {
+function Titulo({tag, children}) {
   
-  const Tag = props.tag || 'h1';
+  const Tag = tag || 'h1';
   return (
     <>
-      <Tag>{props.children}</Tag>
+      <Tag>{children}</Tag>
       <style jsx>{`
             ${Tag} {
                 color: ${appConfig.theme.colors.neutrals["050"]};
@@ -62,17 +36,37 @@ function Titulo(props) {
 //
 //    export default HomePage
 
-export default function PaginaInicial() {
-  const username = 'omariosouto';
+export default function HomePage() {
+  //const username = 'Jorge-pro';
+  const [username, setUsername] = React.useState('');
+  const router = useRouter();
+  const userURL = `https://api.github.com/users/${username}`
+  const [ userBio, setUserBio ] = useState('');
+  const [ userCompany, setUserCompany ] = useState('');
 
+  function handleChange(event) {
+    setUsername(event.target.value)
+
+    if (event.target.value.length > 2) {
+      fetch(userURL)
+        .then(response => response.json())
+        .then(data => {
+          setUserBio(data.bio)
+          setUserCompany(data.company)
+        })
+    }
+  }
+
+  const imageError = 'https://cdn.pixabay.com/photo/2021/05/09/13/10/finance-6240949_960_720.png';
+
+  
   return (
     <>
-      <GlobalStyle />
       <Box
         styleSheet={{
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           backgroundColor: appConfig.theme.colors.primary[200],
-          backgroundImage: 'url(https://images.pexels.com/photos/5980862/pexels-photo-5980862.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940)',
+          backgroundImage: 'url(https://cdn.pixabay.com/photo/2019/05/15/18/31/bitcoin-4205661_960_720.jpg)',
           backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundBlendMode: 'multiply',
         }}
       >
@@ -88,24 +82,43 @@ export default function PaginaInicial() {
             width: '100%', maxWidth: '700px',
             borderRadius: '5px', padding: '32px', margin: '16px',
             boxShadow: '0 2px 10px 0 rgb(0 0 0 / 20%)',
-            backgroundColor: appConfig.theme.colors.neutrals[700],
+            backgroundColor: appConfig.theme.colors.neutrals[600],
           }}
         >
           {/* Formulário */}
           <Box
             as="form"
+            onSubmit={event => {
+              event.preventDefault()
+              router.push('/chat')
+            }}
             styleSheet={{
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
               width: { xs: '100%', sm: '50%' }, textAlign: 'center', marginBottom: '32px',
             }}
           >
-            <Titulo tag="h2">Bem-vindo de volta nosso Milionário!</Titulo>
-            <Text variant="body3" styleSheet={{ marginBottom: '32px', color: appConfig.theme.colors.neutrals[300] }}>
+            <Titulo tag="h2">Bem-vindo de volta Investidor!</Titulo>
+            <Text variant="body3" styleSheet={{ marginBottom: '32px', color: appConfig.theme.colors.primary[300] }}>
               {appConfig.name}
             </Text>
 
+
+            {/*<input
+              type="text"
+              value={username}
+              onChange={function (event) {
+                console.log ('Usuario Digitou', event.target.value);
+                // Onde ta o valor da variavel
+                const valor = event.target.value;
+                //Troca o valor da variavel
+                setUsername(valor);
+              }}
+            />*/}
+
             <TextField
               fullWidth
+              value={username}
+              onChange={handleChange}
               textFieldColors={{
                 neutral: {
                   textColor: appConfig.theme.colors.neutrals[200],
@@ -115,14 +128,15 @@ export default function PaginaInicial() {
                 },
               }}
             />
+
             <Button
               type='submit'
               label='Entrar'
               fullWidth
               buttonColors={{
-                contrastColor: appConfig.theme.colors.neutrals["000"],
+                contrastColor: appConfig.theme.colors.neutrals[100],
                 mainColor: appConfig.theme.colors.primary[500],
-                mainColorLight: appConfig.theme.colors.primary[400],
+                mainColorLight: appConfig.theme.colors.primary[500],
                 mainColorStrong: appConfig.theme.colors.primary[600],
               }}
             />
@@ -151,7 +165,11 @@ export default function PaginaInicial() {
                 borderRadius: '50%',
                 marginBottom: '16px',
               }}
-              src={`https://github.com/${username}.png`}
+              src={
+                username.length > 2
+                  ? `https://github.com/${username}.png`
+                  : imageError
+              }
             />
             <Text
               variant="body4"
