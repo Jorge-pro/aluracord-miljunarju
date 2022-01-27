@@ -1,6 +1,6 @@
 import { Box, Button, Text, TextField, Image } from '@skynexui/components';
 import { useRouter } from 'next/router';
-import appConfig from '../config.json';
+import  appConfig  from '../config.json';
 import React, { useState } from 'react';
 
 
@@ -38,7 +38,7 @@ function Titulo({tag, children}) {
 
 export default function HomePage() {
   //const username = 'Jorge-pro';
-  const [username, setUsername] = React.useState('');
+  const [username, setUsername] = useState('');
   const router = useRouter();
   const userURL = `https://api.github.com/users/${username}`
   const [ userBio, setUserBio ] = useState('');
@@ -64,10 +64,14 @@ export default function HomePage() {
     <>
       <Box
         styleSheet={{
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
           backgroundColor: appConfig.theme.colors.primary[200],
           backgroundImage: 'url(https://cdn.pixabay.com/photo/2019/05/15/18/31/bitcoin-4205661_960_720.jpg)',
-          backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundBlendMode: 'multiply',
+          backgroundRepeat: 'no-repeat', 
+          backgroundSize: 'cover', 
+          backgroundBlendMode: 'multiply',
         }}
       >
         <Box
@@ -79,8 +83,11 @@ export default function HomePage() {
               xs: 'column',
               sm: 'row',
             },
-            width: '100%', maxWidth: '700px',
-            borderRadius: '5px', padding: '32px', margin: '16px',
+            width: '100%', 
+            maxWidth: '700px',
+            borderRadius: '5px', 
+            padding: '32px', 
+            margin: '16px',
             boxShadow: '0 2px 10px 0 rgb(0 0 0 / 20%)',
             backgroundColor: appConfig.theme.colors.neutrals[600],
           }}
@@ -88,18 +95,34 @@ export default function HomePage() {
           {/* Formulário */}
           <Box
             as="form"
+            styleSheet={{
+              display: 'flex', 
+              flexDirection: 'column', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              width: { xs: '100%', sm: '50%' }, 
+              textAlign: 'center', 
+              marginBottom: '32px',
+            }}
             onSubmit={event => {
               event.preventDefault()
               router.push('/chat')
             }}
-            styleSheet={{
-              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              width: { xs: '100%', sm: '50%' }, textAlign: 'center', marginBottom: '32px',
-            }}
           >
-            <Titulo tag="h2">Bem-vindo de volta Investidor!</Titulo>
-            <Text variant="body3" styleSheet={{ marginBottom: '32px', color: appConfig.theme.colors.primary[300] }}>
+            <Titulo tag="h2">
+              Bem-vindo de volta Investidor!
+            </Titulo>
+
+            <Text 
+              variant="body3" 
+              styleSheet={{ 
+                marginBottom: '32px', 
+                color: appConfig.theme.colors.primary[300] 
+              }}
+            >
+
               {appConfig.name}
+            
             </Text>
 
 
@@ -117,6 +140,7 @@ export default function HomePage() {
 
             <TextField
               fullWidth
+              placeholder="Insira seu usuário github aqui..."
               value={username}
               onChange={handleChange}
               textFieldColors={{
