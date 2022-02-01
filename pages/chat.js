@@ -1,18 +1,29 @@
 import { Box, Text, TextField, Image, Button } from '@skynexui/components';
 import React from 'react';
+//import { useRouter } from 'next/router';
 import appConfig from '../config.json';
 import { createClient } from '@supabase/supabase-js';
+import { ButtonSendSticker } from '../components/ButtonSendSticker';
 import avatar from '../assets/avatar.jpg';
 import dynamic from "next/dynamic";
-
-const Header = dynamic(() => import("../components/Header"), {
-  ssr: false,
-});
 
 // Create a single supabase client for interacting with your database
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlhdCI6MTY0MzM0Nzk1MywiZXhwIjoxOTU4OTIzOTUzfQ.JgRtvALKya3CxTsL70gGWCO5Bd5VRtXydWZVbxQ7b38';
 const SUPABASE_URL = 'https://bsjcdemwdcdgwftcyaeo.supabase.co';
 const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const Header = dynamic(() => import("../components/Header"), {
+  ssr: false,
+});
+
+function escutaMensagensEmTempoReal (addMensagem) {
+   return supabaseClient
+      .from('mensagens')
+      .on('INSERT', ( respostaAutomatica ) => {
+        addMensagem(respostaAutomatica.new);         
+        })
+      .subscribe();
+}
 
 export default function ChatPage() {
     const [mensagem, setMensagem] = React.useState('');
@@ -24,11 +35,15 @@ export default function ChatPage() {
             .select('*')
             .order('id', {ascending: false})
             .then(({ data }) => {
-                console.log('Dados da consulta: ', data);
                 setListaDeMensagens(data);
             });
-    }, []);
 
+            escutaMensagensEmTempoReal((novaMensagem) => {
+              setListaDeMensagens((valorAtualDaLista) => {
+                return [novaMensagem, ...valorAtualDaLista]
+              });
+            });
+    }, []);
    
     function handleNovaMensagem(novaMensagem) {
         if(novaMensagem === ""){
@@ -40,18 +55,12 @@ export default function ChatPage() {
         };
 
         supabaseClient
-            .from('mensagens')
-            .insert([
-                mensagem
-            ])
+            .from( 'mensagens' )
+            .insert([ mensagem ])
             .then(({ data }) => {
-                setListaDeMensagens([
-                    data[0],
-                    ...listaDeMensagens,
-                ]);
+              console.log('Criando mensagem', data);
             });
        
-        
         setMensagem('');
     }
 
@@ -60,7 +69,6 @@ export default function ChatPage() {
         .from('mensagens')
         .delete()
         .match({ id: mensagemId });
-        console.log(data);
 
         const {data} = await supabaseClient
             .from('mensagens')
@@ -77,51 +85,54 @@ export default function ChatPage() {
     }
 
     return (
-        <Box
-            styleSheet={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                backgroundColor: appConfig.theme.colors.primary[500],
-                backgroundImage: `url(https://cdn.pixabay.com/photo/2019/05/15/18/31/bitcoin-4205661_960_720.jpg)`,
-                backgroundRepeat: 'no-repeat', backgroundSize: 'cover', backgroundBlendMode: 'multiply',
-                color: appConfig.theme.colors.neutrals['000']
-            }}
-        >
-            <Box
-                styleSheet={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    flex: 1,
-                    boxShadow: '0 2px 10px 0 rgb(0 0 0 / 20%)',
-                    borderRadius: '5px',
-                    backgroundColor: appConfig.theme.colors.neutrals[700],
-                    height: '100%',
-                    maxWidth: '800px',
-                    maxHeight: '95vh',
-                    padding: '32px',
-                }}
-            >
-                <Header avatar={getAvatar()} />
-                <Box
-                    styleSheet={{
-                        position: 'relative',
-                        display: 'flex',
-                        flex: 1,
-                        height: '80%',
-                        backgroundColor: appConfig.theme.colors.neutrals[600],
-                        flexDirection: 'column',
-                        borderRadius: '5px',
-                        padding: '16px',
-                    }}
-                >
-                    <MessageList mensagens={listaDeMensagens} onMessageDelete={deletarMensagem} />
-
-                    <Box
-                        as="form"
-                        styleSheet={{
-                            display: 'flex',
-                            alignItems: 'center',
-                        }}
-                    >
+                        <Box
+                            styleSheet={{
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center',
+                                backgroundColor: appConfig.theme.colors.primary[500],
+                                backgroundImage: `url(https://cdn.pixabay.com/photo/2019/05/15/18/31/bitcoin-4205661_960_720.jpg)`,
+                                backgroundRepeat: 'no-repeat', 
+                                backgroundSize: 'cover', 
+                                backgroundBlendMode: 'multiply',
+                                color: appConfig.theme.colors.neutrals['000']
+                            }}
+                        >
+                        <Box
+                            styleSheet={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                flex: 1,
+                                boxShadow: '0 2px 10px 0 rgb(0 0 0 / 20%)',
+                                borderRadius: '15px',
+                                backgroundColor: appConfig.theme.colors.neutrals[700],
+                                height: '100%',
+                                maxWidth: '900px',
+                                maxHeight: '95vh',
+                                padding: '32px',
+                            }}
+                        >
+                        <Header avatar={getAvatar()} />
+                        <Box
+                            styleSheet={{
+                                position: 'relative',
+                                display: 'flex',
+                                flex: 1,
+                                height: '80%',
+                                backgroundColor: appConfig.theme.colors.neutrals[600],
+                                flexDirection: 'column',
+                                borderRadius: '15px',
+                                padding: '16px',
+                            }}
+                        >
+                        <MessageList mensagens={listaDeMensagens} onMessageDelete={deletarMensagem} />
+                        <Box
+                            as="form"
+                            styleSheet={{
+                                display: 'flex',
+                                alignItems: 'center',
+                            }}
+                        >
                         <TextField
                             value={mensagem}
                             onChange={(event) => {
@@ -140,12 +151,20 @@ export default function ChatPage() {
                                 width: '100%',
                                 border: '0',
                                 resize: 'none',
-                                borderRadius: '5px',
+                                borderRadius: '15px',
                                 padding: '6px 8px',
                                 backgroundColor: appConfig.theme.colors.neutrals[800],
                                 marginBottom:'-8px',
                                 marginRight: '12px',
                                 color: appConfig.theme.colors.neutrals[200],
+                            }}
+                        />
+
+                                      {/*Callback - USANDO O COMPONENTE salva esse sticker no banco*/}
+
+                        <ButtonSendSticker
+                            onStickerClick={(sticker) => {
+                            handleNovaMensagem('sticker: ' + sticker);
                             }}
                         />
                         <Button
@@ -155,7 +174,7 @@ export default function ChatPage() {
                             }}
                             buttonColors={{
                                 contrastColor: appConfig.theme.colors.neutrals["000"],
-                                mainColor: appConfig.theme.colors.primary[500],
+                                mainColor: appConfig.theme.colors.primary[700],
                                 mainColorLight: appConfig.theme.colors.primary[400],
                                 mainColorStrong: appConfig.theme.colors.primary[600],
                               }}
@@ -168,7 +187,6 @@ export default function ChatPage() {
 }
 
 function MessageList(props) {
-
     return (
         <Box
             tag="ul"
@@ -187,7 +205,7 @@ function MessageList(props) {
                         key={mensagem.id}
                         tag="li"
                         styleSheet={{
-                            borderRadius: '5px',
+                            borderRadius: '15px',
                             padding: '6px',
                             marginBottom: '12px',
                             display: 'flex',
@@ -196,16 +214,16 @@ function MessageList(props) {
                             hover: {
                                 backgroundColor: appConfig.theme.colors.neutrals[700],
                             }
-                        }}
-                    >
+                        }}>
+
                         <Box>
                             <Box
                                 styleSheet={{
                                     marginBottom: '8px',
                                     display: 'flex',
                                     alignItems: 'center'
-                                }}
-                            >
+                                }}>
+
                                 <Image
                                     styleSheet={{
                                         width: '20px',
@@ -216,7 +234,9 @@ function MessageList(props) {
                                     }}
                                     src={`https://github.com/${mensagem.de}.png`}
                                 />
-                                <Text tag="strong" styleSheet={{color: appConfig.theme.colors.primary[901]}}>
+                                <Text 
+                                    tag="strong" 
+                                    styleSheet={{color: appConfig.theme.colors.primary[901]}}>
                                     {mensagem.de}
                                 </Text>
                                 <Text
@@ -230,23 +250,35 @@ function MessageList(props) {
                                     {(new Date().toLocaleDateString())}
                                 </Text>
                             </Box>
-                            {mensagem.texto}
+
+                                {/* Modo Declarativo */}
+
+                            {mensagem.texto.startsWith('sticker:') 
+                            ? (<Image 
+                                styleSheet={{
+                                    maxWidth: '250px',
+                                    borderRadius: '10%'
+                                }}
+                                
+                                src={mensagem.texto.replace('sticker:', ' ')}/>)
+                            : (mensagem.texto)}
+                          
                         </Box>
                         <Button 
                             label='x'
                             styleSheet={{
-                                marginRight: '16px',
+                                marginRight: '14px',
                                 borderRadius: '50%',
                                 padding: '0',
                                 padding: 0,
-                                width: '30px',
-                                height: '30px'
+                                width: '15px',
+                                height: '20px'
                             }}
                             buttonColors={{
                                 contrastColor: appConfig.theme.colors.neutrals["000"],
-                                mainColor: appConfig.theme.colors.primary[500],
+                                mainColor: appConfig.theme.colors.primary[600],
                                 mainColorLight: appConfig.theme.colors.primary[400],
-                                mainColorStrong: appConfig.theme.colors.primary[600],
+                                mainColorStrong: appConfig.theme.colors.primary[700],
                             }}
                             onClick={() => {
                                 props.onMessageDelete(mensagem.id);

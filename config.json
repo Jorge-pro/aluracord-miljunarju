@@ -29,8 +29,11 @@
         "800": "#181F25",
         "900": "#101418",
         "999": "#080A0C"
-      },
-  "stickers": [
+      }
+    }
+  },
+
+    "stickers": [
         "https://www.alura.com.br/imersao-react-4/assets/figurinhas/Figurinha_1.png",
         "https://www.alura.com.br/imersao-react-4/assets/figurinhas/Figurinha_2.png",
         "https://www.alura.com.br/imersao-react-4/assets/figurinhas/Figurinha_3.png",
@@ -68,6 +71,4 @@
         "https://c.tenor.com/VylWt5lyjBoAAAAC/omg-yes.gif",
         "https://i.pinimg.com/originals/96/34/c5/9634c520c9a3cd4e7f23190bb2c96500.gif"
       ]
-    }
-  }
 }

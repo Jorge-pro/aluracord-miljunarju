@@ -3,6 +3,7 @@ import React from 'react';
 import {useRouter} from 'next/router';
 import appConfig from '../config.json';
 import avatar from '../assets/avatar.jpg';
+import { useEffect } from 'react';
 
 console.log(avatar);
 
@@ -22,25 +23,29 @@ function Title(props){
     );
 }
 
-//componente React
-//    function HomePage() {
-//    //JSX
-//      return (
-//        <div>
-//          <GlobalStyle />
-//          <Titulo tag="h2">Boas vindas de volta!</Titulo>
-//          <h2>Discord - Altura Matrix</h2>
-//        
-//        </div>
-//      )
-//    }
-//
-//    export default HomePage
-
 export default function HomePage() {
   //const username = 'Jorge-pro';
+  const [githubAccount, setGithubAccount] = React.useState('Jorge-pro')
   const [username, setUsername] = React.useState('');
   const router = useRouter();
+
+  useEffect(() => {
+    fetch(`https://api.github.com/users/${username}`)
+        .then((res) => {
+            if (!res.ok) {
+                throw Error('Não conseguiu fazer a requisição')
+            }
+            return res.json()
+        })
+        .then(async (resultado) => {
+            await setGithubAccount(resultado)
+            sessionStorage.setItem('userName' , resultado.name)
+            sessionStorage.setItem('userIcon' , resultado.login)
+        })
+        .catch(err => {
+            console.log(err.message)
+        })
+}, [username])
 
   return (
     <>
@@ -77,7 +82,11 @@ export default function HomePage() {
           infosDoEvento.preventDefault();
           console.log('Form submetido!');
 
-          router.push('/chat');
+          //router.push('/chat?username=' + username);
+
+          router.push(`/chat?username=${username}`);
+          
+          //window.location.href = '/chat';
         }}
         styleSheet={{
           display: 'flex', 
@@ -136,7 +145,8 @@ export default function HomePage() {
       {/* Formulário */}
 
       {/* Photo Area */}
-
+      
+      
       <Box
         styleSheet={{
           display: 'flex',
@@ -171,6 +181,13 @@ export default function HomePage() {
       >
               {username === '' ? 'Seu Github' : username}
             </Text>
+            <ul
+                                    style={{ display: 'flex', flexDirection: 'column', alignItems: 'center'}}
+                                >
+                                    <li><Text variant="body4" styleSheet={{ color: appConfig.theme.colors.neutrals[300] }}> {githubAccount.name} </Text></li>
+                                    <li><Text variant="body4" styleSheet={{ color: appConfig.theme.colors.neutrals[300] }}> {githubAccount.location} </Text></li>
+                                    <li><a variant="body4" style={{ border: 'solid 1px grey', padding: '0px 5px', borderRadius: '10px', textDecoration: 'none', color: appConfig.theme.colors.neutrals[300], fontSize: '10px', cursor: 'pointer' }} href={ githubAccount.html_url }> Go to Git</a></li>
+                                </ul>
           </Box>
           {/* Photo Area */}
         </Box>
